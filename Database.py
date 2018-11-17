@@ -5,15 +5,6 @@ class Database:
         self.initializeDatabase()
         self.initializeWordsTable()
         self.initializeFontsTable()
-    
-##    def getDatabase():
-##        database = mysql.connector.connect(
-##            host="localhost",
-##            user="root",
-##            passwd="WriteBot",
-##            database="WriteBot"
-##        )
-##        return database
 
     def initializeDatabase(self):
         database = mysql.connector.connect(
@@ -40,12 +31,6 @@ class Database:
     def initializeFontsTable(self):
         self.database.cursor().execute("CREATE TABLE IF NOT EXISTS fonts (id INT AUTO_INCREMENT PRIMARY KEY, fontName VARCHAR(8000))")
         return
-
-##    def start():
-##        createDatabase()
-##        createWordsTable()
-##        createFontsTable()
-##        return
 
     def storeWord(self, str):
         sql = "INSERT INTO words(word) VALUES (%s)"
