@@ -1,5 +1,6 @@
 from Database import Database
 import socket, sys, time
+import speech_recognition as sr
 
 class Server:
     def __init__(self, port):
@@ -37,6 +38,9 @@ class Server:
     
     def executeCommand(self, opcode, message):
         if opcode == "01":
+            print("%s: Received a Start Recording command. Message: %s" %(self.name, message))
+            self.startRecording() #TODO: Make this check for the current system state to make sure it isn't already recording
+        elif opcode == "04":
             print("%s: Storing Message in database. Message: %s" %(self.name, message))
             self.storeWord(message)
         else:
@@ -46,6 +50,43 @@ class Server:
     def storeWord(self, word):
         self.database.storeWord(word)
         return
+
+    #sendMessage('localhost' 1500 1501 'Hello')
+    def sendMessage(host, sendPort, receivePort, data):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server_address = (host, sendPort)
+        receiver_address = ('localhost', receivePort)
+        s.bind(receiver_address)
+        
+        s.sendto(data.encode('utf-8'), server_address)
+        
+        buf, address = s.recvfrom(2048)
+        print ("Received %s bytes from %s: %s" % (len(buf), address, buf))
+        
+        quit()
+
+    def startRecording(self):
+        queue = []
+        r = sr.Recognizer()
+        r.energy_threshhold = 4000
+        with sr.Microphone() as source:
+            print('Recording speech, say something!')
+            try:
+                audio = r.listen(source, timeout = 10) #Set timeout time
+            except sr.WaitTimeoutError:
+                return "Audio Timeout"
+        try:
+            queue = list(r.recognize_google(audio).lower())
+            #print(queue)
+            print(r.recognize_google(audio).lower()) #try commenting out this line to see if it still prints
+            return r.recognize_google(audio)
+        except sr.UnknownValueError:
+            return "Google Speech Recognition could not understand audio"
+        except sr.RequestError as e:
+            return "Could not request results from Google Speech Recognition service; {0}".format(e)
+    
+    def pauseRecording(self):
+        print("Pausing..")
 
 
 server = Server(1069)

@@ -16,12 +16,6 @@ receiver_address = ('localhost', receivePort)
 
 s.bind(receiver_address)
 
-#while 1:
-    #print ("Enter data to transmit: ENTER to quit")
-    #data = sys.stdin.readline().strip()
-    #if not len(data):
-        #break
-#    s.sendall(data.encode('utf-8'))
 message = "Message"
 for x in range(numberOfMessagesToSend):
     print ("")
