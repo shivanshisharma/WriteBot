@@ -6,7 +6,7 @@ class Server:
     
     def __init__(self, port):
         self.name = "Server"
-        self.MICClient_Address = ("localhost", 1078)
+        self.MICClient_Address = ('10.0.0.41', 1078)
         self.shouldStopWriting = False
         self.App_Address = ("localhost", 1070)
         self.port = port
@@ -15,7 +15,7 @@ class Server:
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('localhost', self.port)
+        server_address = ('10.0.0.42', self.port)
         self.socket.bind(server_address)
         print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
 
