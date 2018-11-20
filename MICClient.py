@@ -11,7 +11,7 @@ class MICClient:
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        receive_address = ('localhost', self.receivePort)
+        receive_address = ('10.0.0.41', self.receivePort)
         self.socket.bind(receive_address)
         print("%s: %s operational.\n%s Address: %s" %(self.name, self.name, self.name, receive_address))
 
