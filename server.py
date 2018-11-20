@@ -3,29 +3,30 @@ import socket, sys, time
 import speech_recognition as sr
 
 class Server:
+    
     def __init__(self, port):
         self.name = "Server"
+        self.MICClient_Address = ("localhost", 1078)
+        self.shouldStopWriting = False
+        self.App_Address = ("localhost", 1070)
         self.port = port
         self.database = Database()
         self.listen()
     
     def listen(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server_address = ('localhost', self.port)
-        s.bind(server_address)
+        self.socket.bind(server_address)
         print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
 
         while True:
             print ("%s: Waiting to receive on port %d : press Ctrl-C or Ctrl-Break to stop " %(self.name, self.port))
 
-            buffer, address = s.recvfrom(2048)
+            buffer, address = self.socket.recvfrom(2048)
             if not len(buffer):
                 break
             print ("%s: Received %s bytes from %s %s: " %(self.name, len(buffer), address, buffer.decode('utf8')))
             self.processMessage(buffer)
-            acknowledgement = "09" + buffer.decode('utf8')
-            print ("%s: Sending %s bytes acknowledgement to %s %s: " %(self.name, len(acknowledgement), address, acknowledgement ))
-            s.sendto(acknowledgement.encode('utf-8'), address)
         
         s.shutdown(1)
         return
@@ -37,12 +38,25 @@ class Server:
         self.executeCommand(opcode, message)
     
     def executeCommand(self, opcode, message):
-        if opcode == "01":
+        if opcode == "01" or opcode == "02":
             print("%s: Received a Start Recording command. Message: %s" %(self.name, message))
-            self.startRecording() #TODO: Make this check for the current system state to make sure it isn't already recording
-        elif opcode == "04":
+            self.sendMessage((opcode + message), self.MICClient_Address)
+        elif opcode == "03":
             print("%s: Storing Message in database. Message: %s" %(self.name, message))
             self.storeWord(message)
+            self.sendAcknowledgement(opcode, self.App_Address)
+        elif opcode == "04":
+            print("%s: Starting the writing process.")
+            self.sendAcknowledgement(opcode, self.App_Address)
+            self.shouldStopWriting = False
+            self.writeNextWord()
+        elif opcode == "05":
+            print("%s: Stopping the writing process.")
+            self.shouldStopWriting = True
+            self.sendAcknowledgement(opcode, self.App_Address)
+        elif opcode == "09":
+            print("%s: Received an acknowledgement for command with opcode %s. Forwarding acknowledgement to the app" %(self.name, message))
+            self.sendMessage((opcode + message), self.App_Address) #TODO: Make this check if the server initiated the command (i.e server to Arduino while writing). If so, do not send the ACK to the app
         else:
             print("%s: Invalid Message Received. Opcode: %s. Message: %s" %(self.name, opcode, message))
         return
@@ -50,43 +64,22 @@ class Server:
     def storeWord(self, word):
         self.database.storeWord(word)
         return
-
-    #sendMessage('localhost' 1500 1501 'Hello')
-    def sendMessage(host, sendPort, receivePort, data):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = (host, sendPort)
-        receiver_address = ('localhost', receivePort)
-        s.bind(receiver_address)
-        
-        s.sendto(data.encode('utf-8'), server_address)
-        
-        buf, address = s.recvfrom(2048)
-        print ("Received %s bytes from %s: %s" % (len(buf), address, buf))
-        
-        quit()
-
-    def startRecording(self):
-        queue = []
-        r = sr.Recognizer()
-        r.energy_threshhold = 4000
-        with sr.Microphone() as source:
-            print('Recording speech, say something!')
-            try:
-                audio = r.listen(source, timeout = 10) #Set timeout time
-            except sr.WaitTimeoutError:
-                return "Audio Timeout"
-        try:
-            queue = list(r.recognize_google(audio).lower())
-            #print(queue)
-            print(r.recognize_google(audio).lower()) #try commenting out this line to see if it still prints
-            return r.recognize_google(audio)
-        except sr.UnknownValueError:
-            return "Google Speech Recognition could not understand audio"
-        except sr.RequestError as e:
-            return "Could not request results from Google Speech Recognition service; {0}".format(e)
     
-    def pauseRecording(self):
-        print("Pausing..")
+    def writeNextWord(self):
+        nextWord = self.database.dequeueNextWord()
+        if self.shouldStopWriting or nextWord is None: #TODO: Send a message in the app once there are no words left to write.
+            print("Writing Has Stopped")
+        else:
+            nextWord = self.database.dequeueNextWord()
+            print("Next word to be written is %s" %(nextWord))
+    
+    def sendAcknowledgement(self, messageOpcode, recipientAddress):
+        acknowledgement = "09" + messageOpcode
+        self.sendMessage(acknowledgement, recipientAddress)
+
+    def sendMessage(self, message, recipientAddress):
+        print ("Sending %s to %s" %(message, recipientAddress))
+        self.socket.sendto(message.encode('utf-8'), recipientAddress)
 
 
 server = Server(1069)

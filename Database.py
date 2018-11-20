@@ -62,7 +62,7 @@ class Database:
         cursor.execute(sql)
         wordTuple = cursor.fetchone()
         if wordTuple is not None:
-            deleteWordByID(wordTuple[0])
+            self.deleteWordByID(wordTuple[0])
             return wordTuple[1]
         else:
             return None
