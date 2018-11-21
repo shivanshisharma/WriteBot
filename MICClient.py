@@ -46,21 +46,18 @@ class MICClient:
         return
 
     def startRecording(self):
-        queue = []
+        #queue = []
         r = sr.Recognizer()
         r.energy_threshhold = 4000
         with sr.Microphone() as source:
             print('Recording speech, say something!')
             try:
-                audio = r.listen(source, timeout = 10) #Set timeout time
+                audio = r.listen(source, timeout = 5) #Set timeout time
             except sr.WaitTimeoutError:
-                print('A')
                 return "Audio Timeout"
         try:
-            print('B')
-            queue = list(r.recognize_google(audio).lower())
-            print(queue)
-            print(r.recognize_google(audio).lower()) #try commenting out this line to see if it still prints
+            #queue = list(r.recognize_google(audio).lower())
+            print(r.recognize_google(audio).lower())
             return r.recognize_google(audio)
         except sr.UnknownValueError:
             return "Google Speech Recognition could not understand audio"
