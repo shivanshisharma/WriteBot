@@ -1,9 +1,7 @@
 from Database import Database
 import socket, sys, time
-import speech_recognition as sr
 
 class Server:
-    
     def __init__(self, port):
         self.name = "Server"
         self.MICClient_Address = ('10.0.0.41', 1078)
