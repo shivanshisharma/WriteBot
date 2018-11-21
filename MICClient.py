@@ -50,15 +50,12 @@ class MICClient:
         r.energy_threshhold = 4000 #for sensitive microphone or microphones in louder rooms
         with sr.Microphone() as source:
             print('Recording speech, say something!')
-            try:
-                audio = r.listen(source, timeout = 5) #Set timeout time
-            except sr.WaitTimeoutError:
-                return "Audio Timeout"
-        try:
-            print(r.recognize_google(audio).lower())
-            return r.recognize_google(audio)
-        except sr.UnknownValueError:
-            return "Google Speech Recognition could not understand audio"
+            while(True):
+                try:
+                    audio = r.listen(source)
+                    print(r.recognize_google(audio).lower())
+                except sr.UnknownValueError:
+                    print("Speech Recognition could not understand audio")
     
     def pauseRecording(self):
         print("Pausing..") #TODO: Implement
