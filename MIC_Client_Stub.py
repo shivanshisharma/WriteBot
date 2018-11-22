@@ -20,7 +20,7 @@ message = "Message"
 for x in range(numberOfMessagesToSend):
     print ("")
     print ("Sending Message" + str(x + 1) + " to " + str(server_address))
-    s.sendto(("01" + message + str(x + 1)).encode('utf-8'), server_address)
+    s.sendto(("04" + message + str(x + 1)).encode('utf-8'), server_address)
     print ("Waiting to receive acknowledgement on port %d : press Ctrl-C or Ctrl-Break to stop " % receivePort)
 
     buf, address = s.recvfrom(2048)

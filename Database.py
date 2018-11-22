@@ -68,9 +68,10 @@ class Database:
             return None
 
 ##start()
-##storeWord("Capricious")
-##storeWord("Capricious1")
-##storeWord("Capricious2")
+##database = Database()
+##database.storeWord("Capricious")
+##database.storeWord("Capricious1")
+##database.storeWord("Capricious2")
 ##storeFontName("Helvatica")
 ##storeFontName("Times New Romans")
 ##deleteWordByID("4")

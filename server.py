@@ -53,12 +53,27 @@ class Server:
             self.shouldStopWriting = True
             self.sendAcknowledgement(opcode, self.App_Address)
         elif opcode == "09":
-            print("%s: Received an acknowledgement for command with opcode %s. Forwarding acknowledgement to the app" %(self.name, message))
-            self.sendMessage((opcode + message), self.App_Address) #TODO: Make this check if the server initiated the command (i.e server to Arduino while writing). If so, do not send the ACK to the app
+            self.nextStepForACK(opcode, message)
         else:
             print("%s: Invalid Message Received. Opcode: %s. Message: %s" %(self.name, opcode, message))
         return
-        
+    
+    def nextStepForACK(self, ackOpcode, acknowledgedCommand):
+        if self.isAppCommand(acknowledgedCommand):
+            print("%s: Received an acknowledgement for command with opcode %s. Forwarding acknowledgement to the app" %(self.name, acknowledgedCommand))
+            self.sendMessage((ackOpcode + acknowledgedCommand), self.App_Address)
+        elif self.isServerCommand(acknowledgedCommand):
+            print("%s: Received an acknowledgement for command with opcode %s." %(self.name, acknowledgedCommand))
+            self.writeNextWord();
+        else:
+            print("%s: Invalid ACK Received. Opcode: %s. Message: %s" %(self.name, opcode, acknowledgedCommand))
+    
+    def isAppCommand(self, commandOpcode):
+        return commandOpcode == "01" or commandOpcode == "02" or commandOpcode == "03"
+    
+    def isServerCommand(self, commandOpcode):
+        return commandOpcode == "04" or commandOpcode == "05"
+    
     def storeWord(self, word):
         self.database.storeWord(word)
         return
@@ -67,8 +82,7 @@ class Server:
         nextWord = self.database.dequeueNextWord()
         if self.shouldStopWriting or nextWord is None: #TODO: Send a message in the app once there are no words left to write.
             print("Writing Has Stopped")
-        else:
-            nextWord = self.database.dequeueNextWord()
+        else: #TODO: Send the word/coordinates to the Arduino
             print("Next word to be written is %s" %(nextWord))
     
     def sendAcknowledgement(self, messageOpcode, recipientAddress):
