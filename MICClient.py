@@ -2,21 +2,19 @@ import speech_recognition as sr
 import socket, sys, time
 
 class MICClient:
-    def __init__(self, serverAddress, serverPort, receivePort):
+    def __init__(self, serverIPAddress, serverPort, receivePort): #TODO: Reconsider global variables 
         self.name = "MICClient"
-        self.serverAddress = serverAddress
-        self.serverPort = serverPort
-        self.receivePort = receivePort
-        self.listen()
+        self.serverAddress = (serverIPAddress, serverPort) #TODO: Consider letting the user input these
+        self.listen(receivePort) #TODO: Consider letting the user input this
     
-    def listen(self):
+    def listen(self, receivePort):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        receive_address = ('10.0.0.41', self.receivePort)
+        receive_address = ('10.0.0.41', receivePort) #TODO: Consider letting the user input the address
         self.socket.bind(receive_address)
         print("%s: %s operational.\n%s Address: %s" %(self.name, self.name, self.name, receive_address))
 
         while True:
-            print ("%s: Waiting to receive on port %d : press Ctrl-C or Ctrl-Break to stop " %(self.name, self.receivePort))
+            print ("%s: Waiting to receive on port %d : press Ctrl-C or Ctrl-Break to stop " %(self.name, receivePort))
 
             buffer, address = self.socket.recvfrom(2048)
             if not len(buffer):
@@ -53,7 +51,7 @@ class MICClient:
             while(True):
                 try:
                     audio = r.listen(source)
-                    print(r.recognize_google(audio).lower())
+                    print(r.recognize_google(audio).lower()) #TODO: Send this to the server
                 except sr.UnknownValueError:
                     print("Speech Recognition could not understand audio")
     

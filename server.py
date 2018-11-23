@@ -1,19 +1,22 @@
 from Database import Database
 import socket, sys, time
+import serial
 
 class Server:
-    def __init__(self, port):
+    def __init__(self, port, arduinoConnected = False): #TODO: Reconsider global variables 
         self.name = "Server"
-        self.MICClient_Address = ('10.0.0.41', 1078)
+        self.MICClient_Address = ('10.0.0.41', 1078) #TODO: Consider letting the user input the address
         self.shouldStopWriting = False
-        self.App_Address = ("localhost", 1070)
+        self.App_Address = ("localhost", 1070) #TODO: Consider letting the user input the address
         self.port = port
         self.database = Database()
+        if (arduinoConnected):
+            self.arduinoSerialBus = serial.Serial('/dev/ttyACMO', 9600)
         self.listen()
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('10.0.0.42', self.port)
+        server_address = ('10.0.0.42', self.port) #TODO: Consider letting the user input the address
         self.socket.bind(server_address)
         print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
 
@@ -24,7 +27,7 @@ class Server:
             if not len(buffer):
                 break
             print ("%s: Received %s bytes from %s %s: " %(self.name, len(buffer), address, buffer.decode('utf8')))
-            self.processMessage(buffer)
+            self.processMessage(buffer) #TODO: Make multi-threaded
         
         s.shutdown(1)
         return
@@ -81,17 +84,28 @@ class Server:
     def writeNextWord(self):
         nextWord = self.database.dequeueNextWord()
         if self.shouldStopWriting or nextWord is None: #TODO: Send a message in the app once there are no words left to write.
-            print("Writing Has Stopped")
+            print("%s: Writing Has Stopped" %(self.name))
         else: #TODO: Send the word/coordinates to the Arduino
-            print("Next word to be written is %s" %(nextWord))
+            print("%s: Next word to be written is %s" %(self.name, nextWord))
+            self.sendMessageToArduino(nextWord)
+            getArduinoAcknowledgement() #TODO: Rethink the need to multi-thread listening to the Arduino
     
     def sendAcknowledgement(self, messageOpcode, recipientAddress):
         acknowledgement = "09" + messageOpcode
         self.sendMessage(acknowledgement, recipientAddress)
 
     def sendMessage(self, message, recipientAddress):
-        print ("Sending %s to %s" %(message, recipientAddress))
+        print("%s: Sending %s to %s" %(self.name, message, recipientAddress))
         self.socket.sendto(message.encode('utf-8'), recipientAddress)
+    
+    def sendMessageToArduino(self, message):
+        print("%s: Sending message to Arduino: %s" %(self.name, message))
+        self.arduinoSerialBus.write(message)
+    
+    def getArduinoAcknowledgement(self):
+        message = self.arduinoSerialBus.readline()
+        print("%s: Received message from Arduino: %s" %(self.name, message))
+        self.processMessage(message)
 
 
 server = Server(1069)
