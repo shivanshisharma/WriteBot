@@ -129,7 +129,6 @@ def parse(file):
         new_cmd = re.match('^\[(.*)\]\s(\S+)', text)
         if new_cmd: #new character
             key = new_cmd.group(2)
-            print("0: " + new_cmd.group(0) + "1: " + new_cmd.group(1) + "2: " + new_cmd.group(2))
 ##            num_cmds = int(new_cmd.group(1)) #for debug
             cmds_read = 0
             stroke_list = []
@@ -326,8 +325,6 @@ def code(arg, visit, last):
     font_char_space = font_word_space * (CSpaceP /100.0)
 
     xoffset = 0                 # distance along raw string in font units
-    for x in font:
-        print(x)
     # calc a plot scale so we can show about first 15 chars of string
     # in the preview window
     PlotScale = 15 * font['A'].get_xmax() * XScale / 150
