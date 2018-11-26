@@ -29,7 +29,7 @@
     Rev v2 21.06.2012 ArcEye
 """
 # change this if you want to use another font
-fontfile = "/home/pi/Downloads/qcad-master/fonts/RomanCS.cxf"
+fontfile = "fonts/romanc.cxf"
 
 from Tkinter import *
 from math import *
@@ -103,11 +103,8 @@ class Line:
 def parse(file):
     font = {}
     key = None
-##    num_cmds = 0
+    num_cmds = 0
     line_num = 0
-    cmds_read = 0
-    stroke_list = []
-    xmax, ymax = 0, 0
     for text in file:
         #format for a typical letter (lowercase r):
         ##comment, with a blank line after it
@@ -123,13 +120,13 @@ def parse(file):
             font[key] = Character(key)
             font[key].stroke_list = stroke_list
             font[key].xmax = xmax
-##            if (num_cmds != cmds_read):
-##                print "(warning: discrepancy in number of commands %s, line %s, %s != %s )" % (fontfile, line_num, num_cmds, cmds_read)
+            if (num_cmds != cmds_read):
+                print "(warning: discrepancy in number of commands %s, line %s, %s != %s )" % (fontfile, line_num, num_cmds, cmds_read)
 
-        new_cmd = re.match('^\[(.*)\]\s(\S+)', text)
+        new_cmd = re.match('^\[(.*)\]\s(\d+)', text)
         if new_cmd: #new character
-            key = new_cmd.group(2)
-##            num_cmds = int(new_cmd.group(1)) #for debug
+            key = new_cmd.group(1)
+            num_cmds = int(new_cmd.group(2)) #for debug
             cmds_read = 0
             stroke_list = []
             xmax, ymax = 0, 0
