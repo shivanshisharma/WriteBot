@@ -1,11 +1,14 @@
 import speech_recognition as sr
-import socket, sys, time
+import socket, threading
+#import time
 
 class MICClient:
     def __init__(self, serverIPAddress, serverPort, receivePort): #TODO: Reconsider global variables 
         self.name = "MICClient"
         self.serverAddress = (serverIPAddress, serverPort) #TODO: Consider letting the user input these
         self.listen(receivePort) #TODO: Consider letting the user input this
+        self.listeningThread = threading.Thread(target = self.listen, args = [recievePort])
+        self.listeningThread.start()
     
     def listen(self, receivePort):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -51,12 +54,20 @@ class MICClient:
             while(True):
                 try:
                     audio = r.listen(source)
-                    print(r.recognize_google(audio).lower()) #TODO: Send this to the server
+                    sendMessage(self, r.recognize_google(audio), serverAddress)
                 except sr.UnknownValueError:
                     print("Speech Recognition could not understand audio")
-    
+
+    def callback(self, recognizer, audio):
+        try: 
+            sendMessage(self, r.recognize_google(audio), serverAddress)
+        except sr.RequestError: 
+	    print("There was an issue in handling the request, please try again")
+        except sr.UnknownValueError:
+            print("Unable to Recognize speech")
+
     def pauseRecording(self):
-        print("Pausing..") #TODO: Implement
+        sr.Recognizer().listen_in_background(sr.Microphone(), self.callback)
     
     def sendAcknowledgement(self, messageOpcode, recipientAddress):
         acknowledgement = "09" + messageOpcode
@@ -67,3 +78,6 @@ class MICClient:
         self.socket.sendto(message.encode('utf-8'), recipientAddress)
 
 MICClient('localhost', 1069, 1078)
+#m.startRecording()
+#time.sleep(5)
+#m.pauseRecording()
