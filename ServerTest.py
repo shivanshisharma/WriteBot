@@ -1,14 +1,11 @@
 from unittest import mock
+from unittest.mock import sentinel, patch
 from server import Server
 
 def testServerInitializer():
-    testServer = Server(1069)
-    self.assertEqual(testServer.name, "Server")
-    self.assertEqual(testServer.MICClient_Address, ("localhost", 1078))
-    self.assertFalse(testServer.shouldStopWriting)
-    self.assertEqual(testServer.App_Addressname, ("localhost", 1070))
-    self.assertEqual(testServer.port, 1069)
-    self.assertIsNotNone(testServer.database)
-    testServer = None
+    sut = Server(1069)
+    with patch("server.Server.database") as mock_store:
+        sut.storeWord("Hello4")
+    mock_store.assert_called_once_with("Hello1")
     
 testServerInitializer()

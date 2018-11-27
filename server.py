@@ -1,22 +1,24 @@
 from Database import Database
 import socket, sys, time
 import serial
+import threading
 
 class Server:
     def __init__(self, port, arduinoConnected = False): #TODO: Reconsider global variables 
         self.name = "Server"
         self.MICClient_Address = ('10.0.0.41', 1078) #TODO: Consider letting the user input the address
         self.shouldStopWriting = False
-        self.App_Address = ("localhost", 1070) #TODO: Consider letting the user input the address
+        self.App_Address = ("10.0.0.42", 1070) #TODO: Consider letting the user input the address
         self.port = port
         self.database = Database()
         if (arduinoConnected):
             self.arduinoSerialBus = serial.Serial('/dev/ttyACMO', 9600)
-        self.listen()
+        thread1 = threading.Thread(target = self.listen, args = [])
+        thread1.start()
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('10.0.0.42', self.port) #TODO: Consider letting the user input the address
+        server_address = ('localhost', self.port) #TODO: Consider letting the user input the address
         self.socket.bind(server_address)
         print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
 
