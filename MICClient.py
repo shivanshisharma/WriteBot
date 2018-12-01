@@ -1,14 +1,14 @@
 import speech_recognition as sr
-import socket, threading
-#import time
+import socket
 
 class MICClient:
     def __init__(self, serverIPAddress, serverPort, receivePort): #TODO: Reconsider global variables 
         self.name = "MICClient"
         self.serverAddress = (serverIPAddress, serverPort) #TODO: Consider letting the user input these
+        self.recognizer = sr.Recognizer()
+        self.recognizer.energy_threshhold = 4000 #for sensitive microphone or microphones in louder rooms
+        self.microphone = sr.Microphone()
         self.listen(receivePort) #TODO: Consider letting the user input this
-        self.listeningThread = threading.Thread(target = self.listen, args = [recievePort])
-        self.listeningThread.start()
     
     def listen(self, receivePort):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -46,29 +46,20 @@ class MICClient:
             print("%s: Invalid Message Received. Opcode: %s. Message: %s" %(self.name, opcode, message))
         return
 
-    def startRecording(self):
-        r = sr.Recognizer()
-        r.energy_threshhold = 4000 #for sensitive microphone or microphones in louder rooms
-        with sr.Microphone() as source:
-            print('Recording speech, say something!')
-            while(True):
-                try:
-                    audio = r.listen(source)
-                    sendMessage(self, r.recognize_google(audio), serverAddress)
-                except sr.UnknownValueError:
-                    print("Speech Recognition could not understand audio")
-
-    def callback(self, recognizer, audio):
-        try: 
-            sendMessage(self, r.recognize_google(audio), serverAddress)
-        except sr.RequestError: 
-	    print("There was an issue in handling the request, please try again")
+    def callback(recognizer, audio):
+        try:
+            sendMessage(self, recognizer.recognize_google(audio), serverAddress)
         except sr.UnknownValueError:
-            print("Unable to Recognize speech")
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+    def startRecording(self):
+        self.stop_listening = r.listen_in_background(m, callback)
 
     def pauseRecording(self):
-        sr.Recognizer().listen_in_background(sr.Microphone(), self.callback)
-    
+        self.stop_listening()
+        
     def sendAcknowledgement(self, messageOpcode, recipientAddress):
         acknowledgement = "09" + messageOpcode
         self.sendMessage(acknowledgement, recipientAddress)
@@ -78,6 +69,3 @@ class MICClient:
         self.socket.sendto(message.encode('utf-8'), recipientAddress)
 
 MICClient('localhost', 1069, 1078)
-#m.startRecording()
-#time.sleep(5)
-#m.pauseRecording()
