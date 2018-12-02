@@ -66,7 +66,18 @@ class Database:
             return wordTuple[1]
         else:
             return None
-
+        
+    def getAllWords(self):
+        words = []
+        sql = "SELECT * FROM words"
+        cursor = self.database.cursor(buffered=True)
+        cursor.execute(sql)
+        for wordTuple in cursor.fetchall():
+            words.append(wordTuple[1])
+            
+        return words
+    
+    
 ##start()
 ##database = Database()
 ##database.storeWord("Capricious")

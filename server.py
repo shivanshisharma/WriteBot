@@ -1,22 +1,23 @@
 from Database import Database
 import socket, sys, time
 import serial
+import threading
 
 class Server:
     def __init__(self, port, arduinoConnected = False): #TODO: Reconsider global variables 
         self.name = "Server"
         self.MICClient_Address = ('10.0.0.41', 1078) #TODO: Consider letting the user input the address
         self.shouldStopWriting = False
-        self.App_Address = ("localhost", 1070) #TODO: Consider letting the user input the address
         self.port = port
         self.database = Database()
         if (arduinoConnected):
             self.arduinoSerialBus = serial.Serial('/dev/ttyACMO', 9600)
-        self.listen()
+        thread1 = threading.Thread(target = self.listen, args = [])
+        thread1.start()
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('10.0.0.42', self.port) #TODO: Consider letting the user input the address
+        server_address = ('172.20.10.8', self.port) #TODO: Consider letting the user input the address
         self.socket.bind(server_address)
         print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
 
@@ -27,31 +28,36 @@ class Server:
             if not len(buffer):
                 break
             print ("%s: Received %s bytes from %s %s: " %(self.name, len(buffer), address, buffer.decode('utf8')))
-            self.processMessage(buffer) #TODO: Make multi-threaded
+            self.processMessage(buffer, address) #TODO: Make multi-threaded
         
         s.shutdown(1)
         return
     
-    def processMessage(self, buffer):
+    def processMessage(self, buffer, sender):
         opcode = (buffer[:2]).decode('utf8')
         message = (buffer[2:len(buffer)]).decode('utf8')
         print("%s: Opcode: %s. Message: %s" %(self.name, opcode, message))
-        self.executeCommand(opcode, message)
+        self.executeCommand(opcode, message, sender)
     
-    def executeCommand(self, opcode, message):
+    def executeCommand(self, opcode, message, sender):
         if opcode == "01" or opcode == "02":
             print("%s: Received a Start Recording command. Message: %s" %(self.name, message))
+            self.App_Address = sender
             self.sendMessage((opcode + message), self.MICClient_Address)
         elif opcode == "03":
+            self.App_Address = sender
             print("%s: Storing Message in database. Message: %s" %(self.name, message))
-            self.storeWord(message)
+            self.storeText(message)
             self.sendAcknowledgement(opcode, self.App_Address)
+            self.updateApp()
         elif opcode == "04":
+            self.App_Address = sender
             print("%s: Starting the writing process.")
             self.sendAcknowledgement(opcode, self.App_Address)
             self.shouldStopWriting = False
             self.writeNextWord()
         elif opcode == "05":
+            self.App_Address = sender
             print("%s: Stopping the writing process.")
             self.shouldStopWriting = True
             self.sendAcknowledgement(opcode, self.App_Address)
@@ -77,8 +83,10 @@ class Server:
     def isServerCommand(self, commandOpcode):
         return commandOpcode == "04" or commandOpcode == "05"
     
-    def storeWord(self, word):
-        self.database.storeWord(word)
+    def storeText(self, text):        
+        for word in text.split():
+            self.database.storeWord(word)
+            
         return
     
     def writeNextWord(self):
@@ -90,6 +98,11 @@ class Server:
             self.sendMessageToArduino(nextWord)
             getArduinoAcknowledgement() #TODO: Rethink the need to multi-thread listening to the Arduino
     
+    def updateApp(self):
+        words = self.database.getAllWords()
+        message = '06' + ' '.join(words)
+        self.sendMessage(message, self.App_Address)
+
     def sendAcknowledgement(self, messageOpcode, recipientAddress):
         acknowledgement = "09" + messageOpcode
         self.sendMessage(acknowledgement, recipientAddress)
