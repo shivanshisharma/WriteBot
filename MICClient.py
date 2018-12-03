@@ -2,19 +2,23 @@ import speech_recognition as sr
 import socket
 
 class MICClient:
-    def __init__(self, serverIPAddress, serverPort, receivePort): #TODO: Reconsider global variables 
+    def __init__(self):
         self.name = "MICClient"
-        self.serverAddress = (serverIPAddress, serverPort) #TODO: Consider letting the user input these
-        self.listen(receivePort) #TODO: Consider letting the user input this
+        serverIPAddress = input("Enter server IP address: ")
+        serverPort = int(input("Enter server port: "))
+        self.serverAddress = (serverIPAddress, serverPort)
+        receiveIPAddress = input("Enter receiver IP address: ")
+        receivePort = int(input("Enter receiver port: "))
+        self.receiveAddress = (receiveIPAddress, receivePort)
+        self.listen()
     
-    def listen(self, receivePort):
+    def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        receive_address = ('10.0.1.41', receivePort) #TODO: Consider letting the user input the address
-        self.socket.bind(receive_address)
-        print("%s: %s operational.\n%s Address: %s" %(self.name, self.name, self.name, receive_address))
+        self.socket.bind(self.receiveAddress)
+        print("%s: %s operational.\n%s Address: %s" %(self.name, self.name, self.name, self.receiveAddress))
 
         while True:
-            print ("%s: Waiting to receive on port %d : press Ctrl-C or Ctrl-Break to stop " %(self.name, receivePort))
+            print ("%s: Waiting to receive on %s : press Ctrl-C or Ctrl-Break to stop " %(self.name, self.receiveAddress))
 
             buffer, address = self.socket.recvfrom(2048)
             if not len(buffer):
@@ -71,4 +75,4 @@ class MICClient:
         print ("Sending %s to %s" %(message, recipientAddress))
         self.socket.sendto(message.encode('utf-8'), recipientAddress)
 
-MICClient('10.0.1.42', 1069, 1078)
+MICClient()
