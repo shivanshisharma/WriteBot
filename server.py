@@ -6,7 +6,7 @@ import threading
 class Server:
     def __init__(self, port, arduinoConnected = False): #TODO: Reconsider global variables 
         self.name = "Server"
-        self.MICClient_Address = ('10.0.0.41', 1078) #TODO: Consider letting the user input the address
+        self.MICClient_Address = ('localhost', 1078) #TODO: Consider letting the user input the address
         self.shouldStopWriting = False
         self.App_Address = ("10.0.0.42", 1070) #TODO: Consider letting the user input the address
         self.port = port
