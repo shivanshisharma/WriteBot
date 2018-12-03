@@ -1,82 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_width="match_parent"
     android:background="@color/colorAccent"
-    tools:actionBarNavMode="@color/background_dark"
-    tools:context=".SecondScreen">
+    tools:context=".SecondScreen"
+    android:orientation="vertical">
 
     <EditText
         android:id="@+id/editText"
-        android:layout_width="330dp"
-        android:layout_height="182dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="68dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginRight="30dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:scrollHorizontally="true"
-        android:singleLine="false"
-        android:text="Recorded Message is Displayed Here"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.136"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-        android:cursorVisible="true"
-        android:textCursorDrawable="@null"
+        android:layout_width="350dp"
+        android:layout_height="230dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"
+        android:background="@android:color/background_light"
+        android:gravity="left|center"
+        android:hint="Your Recorded Message Is Displayed Here"
+        android:scrollbars="vertical"
+        android:textCursorDrawable="@drawable/color_cursor" />
 
-    <ToggleButton
-        android:id="@+id/toggleButton"
-        android:layout_width="135dp"
-        android:layout_height="46dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
-        android:layout_marginBottom="110dp"
-        android:background="@android:color/darker_gray"
-        android:text="@string/togglebutton"
-        android:textOff="@string/start_recording"
-        android:textOn="@string/stop_recording"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+<ToggleButton
+    android:layout_width="wrap_content"
+    android:id="@+id/toggleButton"
+    android:layout_height="wrap_content"
+    android:textOn="Stop Recording"
+    android:textOff="Start Recording"
+    android:layout_gravity="center"
+    android:layout_marginTop="90dp"
+    android:background="@android:color/darker_gray"/>
 
-    <ToggleButton
-        android:id="@+id/toggleButton2"
-        android:layout_width="135dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
-        android:layout_marginBottom="35dp"
-        android:background="@android:color/darker_gray"
-        android:text="@string/togglebutton"
-        android:textOff="@string/start_writing"
-        android:textOn="@string/stop_writing"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+<ToggleButton
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/toggleButton2"
+    android:layout_gravity="center"
+    android:layout_marginTop="25dp"
+    android:text="@string/togglebutton"
+    android:textOff="@string/start_writing"
+    android:textOn="@string/stop_writing"
+    android:background="@android:color/darker_gray"/>
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="132dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
-        android:layout_marginBottom="30dp"
-        android:background="@android:color/darker_gray"
-        android:text="@string/send_text"
-        app:layout_constraintBottom_toTopOf="@+id/toggleButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+<Button
+    android:id="@+id/button2"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/darker_gray"
+    android:layout_gravity="center"
+    android:layout_marginTop="25dp"
+    android:text="Send Text"/>
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

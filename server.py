@@ -18,7 +18,7 @@ class Server:
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('localhost', self.port) #TODO: Consider letting the user input the address
+        server_address = ('172.20.10.8', self.port) #TODO: Consider letting the user input the address
         self.socket.bind(server_address)
         print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
 
