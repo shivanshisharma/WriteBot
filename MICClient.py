@@ -49,20 +49,21 @@ class MICClient:
 
     def startRecording(self):        
         def callback(recognizer, audio):
+            print("Just started callback")
             try:
-                print("Say something!")
-                sendMessage(self, recognizer.recognize_google(audio), serverAddress)
+                print("Entered Try")
+                self.sendMessage(("03" + recognizer.recognize_google(audio)), self.serverAddress)
             except sr.UnknownValueError:
                 print("Google Speech Recognition could not understand audio")
             except sr.RequestError as e:
                 print("Could not request results from Google Speech Recognition service; {0}".format(e))
                 
         recognizer = sr.Recognizer()
-        #recognizer.energy_threshhold = 4000 #for sensitive microphone or microphones in louder rooms
+        recognizer.energy_threshhold = 4000 #for sensitive microphone or microphones in louder rooms
         microphone = sr.Microphone()
                 
         self.stop_listening = recognizer.listen_in_background(microphone, callback)
-        print("Just started callback")
+        print("Say Something!")
 
     def pauseRecording(self):
         self.stop_listening()
