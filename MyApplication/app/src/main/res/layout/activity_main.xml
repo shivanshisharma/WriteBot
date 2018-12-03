@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAccent"
+    android:orientation="vertical"
+    tools:context=".SecondScreen">
+
+    <EditText
+        android:id="@+id/editText2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:focusable="false"
+        android:foregroundGravity="center_horizontal"
+        android:inputType="textPersonName"
+        android:text="Edit text and Select a Font" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="370dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"
+        android:background="@android:color/background_light"
+        android:gravity="left|center"
+        android:hint="Your Recorded Message Is Displayed Here"
+        android:scrollbars="vertical"
+        android:textCursorDrawable="@drawable/color_cursor" />
+    <Spinner
+        android:id="@+id/fonts_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+
+        android:prompt="@string/font_prompt"
+        android:background="@android:drawable/btn_dropdown"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        />
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/darker_gray"
+        android:textOff="Start Recording"
+        android:textOn="Stop Recording" />
+
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/darker_gray"
+        android:text="@string/send_text" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/darker_gray"
+        android:text="@string/togglebutton"
+        android:textOff="@string/start_writing"
+        android:textOn="@string/stop_writing" />
+
+</LinearLayout>

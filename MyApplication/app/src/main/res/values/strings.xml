@@ -1,0 +1,50 @@
+<resources>
+
+    <string name="togglebutton">ToggleButton</string>
+    <string name="stop_recording">Stop Recording</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="stop_writing">Stop Writing</string>
+    <string name="start_writing">Start Writing</string>
+    <string name="send_text">Send Text</string>
+    <string name="font_prompt">--Select a Font--</string>
+
+    <string-array name="fonts_array">
+
+        <item>courier</item>
+        <item>cursive</item>
+        <item>cyrillic_ii</item>
+        <item>gothgbt</item>
+        <item>gothgrt</item>
+        <item>gothitt</item>
+        <item>greek_ol</item>
+        <item>greekc</item>
+        <item>greekcs</item>
+        <item>greekp</item>
+        <item>greeks</item>
+        <item>iso8859-11</item>
+        <item>italicc</item>
+        <item>italiccs</item>
+        <item>italict</item>
+        <item>kochigothic</item>
+        <item>kochimincho</item>
+        <item>normal</item>
+        <item>normallatin1</item>
+        <item>normallatin2</item>
+        <item>romanc</item>
+        <item>romancs</item>
+        <item>romand</item>
+        <item>romanp</item>
+        <item>romans</item>
+        <item>romans2</item>
+        <item>romant</item>
+        <item>scriptc</item>
+        <item>scripts</item>
+        <item>standard</item>
+        <item>symbol</item>
+        <item>symbol_astro</item>
+        <item>symbol_misc1</item>
+        <item>symbol_misc2</item>
+        <item>unicode</item>
+
+    </string-array>
+</resources>
