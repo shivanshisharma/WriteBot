@@ -1,34 +1,46 @@
 from Database import Database
+from GCodeGenerator import GCodeGenerator
 import socket, sys, time
 import serial
 import threading
 
 class Server:
-    def __init__(self, port, arduinoConnected = False): #TODO: Reconsider global variables 
+    def __init__(self): #TODO: Reconsider global variables 
         self.name = "Server"
-        self.MICClient_Address = ('10.0.0.41', 1078) #TODO: Consider letting the user input the address
+##        serverIPAddress = input("Please Enter Server's IP address: ")
+##        serverPort = int(input("Please Enter Server's Port: "))
+##        MICClientIPAddress = input("Please Enter MICClient's IP address: ")
+##        MICClientPort = int(input("Please Enter MICClient's Port: "))
+##        AppIPAddress = input("Please Enter App's IP address: ")
+##        AppIPPort = int(input("Please Enter App's Port: "))
+##        self.MICClient_Address = (MICClientIPAddress, MICClientPort)
+##        self.App_Address = (AppIPAddress, AppIPPort)
+##        self.Server_Address = (serverIPAddress, serverPort)
+        self.MICClient_Address = ('192.168.1.41', 1070)
+        self.App_Address = ('192.168.1.3', 1068)
+        self.Server_Address = ('192.168.1.4', 1069)
         self.shouldStopWriting = False
-        self.port = port
         self.database = Database()
-        if (arduinoConnected):
-            self.arduinoSerialBus = serial.Serial('/dev/ttyACMO', 9600)
-        thread1 = threading.Thread(target = self.listen, args = [])
-        thread1.start()
+        self.GCodeGenerator = GCodeGenerator()
+##        self.arduinoSerialBus = serial.Serial('/dev/ttyACM0', 9600)
+        self.listen()
+##        listeningThread = threading.Thread(target = self.listen, args = [])
+##        listeningThread.start()
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('172.20.10.8', self.port) #TODO: Consider letting the user input the address
-        self.socket.bind(server_address)
-        print("%s: Server operational.\nServer Address: %s" %(self.name, server_address))
+        self.socket.bind(self.Server_Address)
+        print("%s: Server operational.\nServer Address: %s" %(self.name, self.Server_Address))
 
         while True:
-            print ("%s: Waiting to receive on port %d : press Ctrl-C or Ctrl-Break to stop " %(self.name, self.port))
+            print ("%s: Waiting to receive: press Ctrl-C or Ctrl-Break to stop " %(self.name))
 
             buffer, address = self.socket.recvfrom(2048)
             if not len(buffer):
                 break
             print ("%s: Received %s bytes from %s %s: " %(self.name, len(buffer), address, buffer.decode('utf8')))
-            self.processMessage(buffer, address) #TODO: Make multi-threaded
+            processingThread = threading.Thread(target = self.processMessage, args = [buffer, address])
+            processingThread.start()
         
         s.shutdown(1)
         return
@@ -42,25 +54,30 @@ class Server:
     def executeCommand(self, opcode, message, sender):
         if opcode == "01" or opcode == "02":
             print("%s: Received a Start Recording command. Message: %s" %(self.name, message))
-            self.App_Address = sender
             self.sendMessage((opcode + message), self.MICClient_Address)
         elif opcode == "03":
-            self.App_Address = sender
+            print("Expected Address: %s Sender: %s Equal %s" %(self.App_Address, sender, (sender == self.App_Address)))
             print("%s: Storing Message in database. Message: %s" %(self.name, message))
+            if sender == self.App_Address:
+                print("Deleting All Words")
+                self.database.deleteAllWords()
             self.storeText(message)
-            self.sendAcknowledgement(opcode, self.App_Address)
+            self.sendAcknowledgement(opcode, sender)
             self.updateApp()
         elif opcode == "04":
-            self.App_Address = sender
             print("%s: Starting the writing process.")
-            self.sendAcknowledgement(opcode, self.App_Address)
+            self.sendAcknowledgement(opcode, sender)
             self.shouldStopWriting = False
             self.writeNextWord()
         elif opcode == "05":
-            self.App_Address = sender
             print("%s: Stopping the writing process.")
             self.shouldStopWriting = True
-            self.sendAcknowledgement(opcode, self.App_Address)
+            self.sendAcknowledgement(opcode, sender)
+        elif opcode == "07":
+            print("%s: Storing font %s in the database." %(self.name, message))
+            self.database.deleteAllFonts()
+            self.database.storeFont(message)
+            self.sendAcknowledgement(opcode, sender)
         elif opcode == "09":
             self.nextStepForACK(opcode, message)
         else:
@@ -71,17 +88,22 @@ class Server:
         if self.isAppCommand(acknowledgedCommand):
             print("%s: Received an acknowledgement for command with opcode %s. Forwarding acknowledgement to the app" %(self.name, acknowledgedCommand))
             self.sendMessage((ackOpcode + acknowledgedCommand), self.App_Address)
-        elif self.isServerCommand(acknowledgedCommand):
-            print("%s: Received an acknowledgement for command with opcode %s." %(self.name, acknowledgedCommand))
+        elif self.isWritingCommand(acknowledgedCommand):
+            print("%s: Received an acknowledgement for writing command with opcode %s." %(self.name, acknowledgedCommand))
             self.writeNextWord();
+        elif self.isServerCommand(acknowledgedCommand):
+            print("%s: Received an acknowledgement for server command with opcode %s." %(self.name, acknowledgedCommand))
         else:
-            print("%s: Invalid ACK Received. Opcode: %s. Message: %s" %(self.name, opcode, acknowledgedCommand))
+            print("%s: Invalid ACK Received. Opcode: %s. Message: %s" %(self.name, ackOpcode, acknowledgedCommand))
     
     def isAppCommand(self, commandOpcode):
-        return commandOpcode == "01" or commandOpcode == "02" or commandOpcode == "03"
+        return commandOpcode == "01" or commandOpcode == "02" or commandOpcode == "03" or commandOpcode == "07" or commandOpcode == "08"
+    
+    def isWritingCommand(self, commandOpcode):
+        return commandOpcode == "04" or commandOpcode == "05"
     
     def isServerCommand(self, commandOpcode):
-        return commandOpcode == "04" or commandOpcode == "05"
+        return self.isWritingCommand(commandOpcode) or commandOpcode == "07"
     
     def storeText(self, text):        
         for word in text.split():
@@ -90,13 +112,22 @@ class Server:
         return
     
     def writeNextWord(self):
-        nextWord = self.database.dequeueNextWord()
-        if self.shouldStopWriting or nextWord is None: #TODO: Send a message in the app once there are no words left to write.
+        if self.shouldStopWriting:
             print("%s: Writing Has Stopped" %(self.name))
-        else: #TODO: Send the word/coordinates to the Arduino
+            return
+        nextWord = self.database.dequeueNextWord()
+        if nextWord is None: 
+            print("%s: No more words to write" %(self.name))
+        else:
             print("%s: Next word to be written is %s" %(self.name, nextWord))
-            self.sendMessageToArduino(nextWord)
-            getArduinoAcknowledgement() #TODO: Rethink the need to multi-thread listening to the Arduino
+            print(self.shouldStopWriting)
+            font = self.database.getSelectedFont()
+            gCode = self.GCodeGenerator.generateGCode(nextWord, font)
+            print("\n".join(gCode))
+            for line in gCode:
+                self.sendMessageToArduino(line)
+                self.getArduinoAcknowledgement()
+            self.writeNextWord()
     
     def updateApp(self):
         words = self.database.getAllWords()
@@ -114,11 +145,15 @@ class Server:
     def sendMessageToArduino(self, message):
         print("%s: Sending message to Arduino: %s" %(self.name, message))
         self.arduinoSerialBus.write(message)
+        self.arduinoSerialBus.flush()
     
     def getArduinoAcknowledgement(self):
         message = self.arduinoSerialBus.readline()
-        print("%s: Received message from Arduino: %s" %(self.name, message))
-        self.processMessage(message)
+        if "09" in message:
+            print("%s: Received acknowledgement from Arduino: %s" %(self.name, message))
+        else:
+            print(message)
+            self.getArduinoAcknowledgement()
 
 
-server = Server(1069)
+server = Server()
