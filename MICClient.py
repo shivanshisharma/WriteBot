@@ -24,9 +24,7 @@ class MICClient:
             if not len(buffer):
                 break
             print ("%s: Received %s bytes from %s %s: " %(self.name, len(buffer), address, buffer.decode('utf8')))
-            self.processMessage(buffer)
-            self.sendAcknowledgement((buffer[:2]).decode('utf8'), address)
-        
+            self.processMessage(buffer)        
         self.socket.shutdown(1)
         return
     
@@ -40,9 +38,13 @@ class MICClient:
         if opcode == "01":
             print("%s: Received a Start Recording command. Message: %s" %(self.name, message))
             self.startRecording() #TODO: Make this check for the current system state to make sure it isn't already recording
+            self.sendAcknowledgement(opcode)
         elif opcode == "02":
             print("%s: Received a Pause Recording command. Message: %s" %(self.name, message))
             self.pauseRecording() #TODO: Make this check for the current system state to make sure it is already recording
+            self.sendAcknowledgement(opcode)
+        elif opcode == "09":
+            print("%s: Received acknowledgement for command with opcode: %s" %(self.name, opcode))
         else:
             print("%s: Invalid Message Received. Opcode: %s. Message: %s" %(self.name, opcode, message))
         return
@@ -68,9 +70,9 @@ class MICClient:
     def pauseRecording(self):
         self.stop_listening()
         
-    def sendAcknowledgement(self, messageOpcode, recipientAddress):
+    def sendAcknowledgement(self, messageOpcode):
         acknowledgement = "09" + messageOpcode
-        self.sendMessage(acknowledgement, recipientAddress)
+        self.sendMessage(acknowledgement, self.serverAddress)
 
     def sendMessage(self, message, recipientAddress):
         print ("Sending %s to %s" %(message, recipientAddress))
