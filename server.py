@@ -5,27 +5,22 @@ import serial
 import threading
 
 class Server:
-    def __init__(self): #TODO: Reconsider global variables 
+    def __init__(self): 
         self.name = "Server"
-##        serverIPAddress = input("Please Enter Server's IP address: ")
-##        serverPort = int(input("Please Enter Server's Port: "))
-##        MICClientIPAddress = input("Please Enter MICClient's IP address: ")
-##        MICClientPort = int(input("Please Enter MICClient's Port: "))
-##        AppIPAddress = input("Please Enter App's IP address: ")
-##        AppIPPort = int(input("Please Enter App's Port: "))
-##        self.MICClient_Address = (MICClientIPAddress, MICClientPort)
-##        self.App_Address = (AppIPAddress, AppIPPort)
-##        self.Server_Address = (serverIPAddress, serverPort)
-        self.MICClient_Address = ('192.168.1.41', 1070)
-        self.App_Address = ('192.168.1.3', 1068)
-        self.Server_Address = ('192.168.1.4', 1069)
+        serverIPAddress = input("Please Enter Server's IP address: ")
+        serverPort = int(input("Please Enter Server's Port: "))
+        MICClientIPAddress = input("Please Enter MICClient's IP address: ")
+        MICClientPort = int(input("Please Enter MICClient's Port: "))
+        AppIPAddress = input("Please Enter App's IP address: ")
+        AppIPPort = int(input("Please Enter App's Port: "))
+        self.MICClient_Address = (MICClientIPAddress, MICClientPort)
+        self.App_Address = (AppIPAddress, AppIPPort)
+        self.Server_Address = (serverIPAddress, serverPort)
         self.shouldStopWriting = False
         self.database = Database()
         self.GCodeGenerator = GCodeGenerator()
-##        self.arduinoSerialBus = serial.Serial('/dev/ttyACM0', 9600)
+        self.arduinoSerialBus = serial.Serial('/dev/ttyACM1', 9600)
         self.listen()
-##        listeningThread = threading.Thread(target = self.listen, args = [])
-##        listeningThread.start()
     
     def listen(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

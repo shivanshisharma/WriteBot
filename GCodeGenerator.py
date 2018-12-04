@@ -53,9 +53,6 @@ WSpaceP=   100
 Angle =    0
 Mirror = 0
 Flip = 0
-Preamble = "G17 G21 G40 G90 G64 P0.003 F50"
-Postamble = "M2"
-
 stringlist = []
 
 #=======================================================================
@@ -96,7 +93,6 @@ class GCodeGenerator:
         gcode = []      
         oldx = oldy = -99990.0      
                      
-        gcode.append(Preamble + "~")
         gcode.append( 'G0 Z%.4f~' %(SafeZ))
         font = self.parse(fontName)
 
@@ -153,12 +149,6 @@ class GCodeGenerator:
                print("(warning: character '0x%02X' not found in font defn)" % ord(char))
 
         gcode.append("G0 Z%.4f~" %(SafeZ))     # final engraver up
-
-        # finish up with icing
-        gcode.append(Postamble + "~")
-      
-##        for line in gcode:
-##                sys.stdout.write(line+'\')
         return gcode
     
     def parse(self, fontName):
