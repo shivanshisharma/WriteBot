@@ -37,12 +37,11 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
-
         android:prompt="@string/font_prompt"
         android:background="@android:drawable/btn_dropdown"
         android:textAlignment="center"
-        android:textSize="14sp"
-        />
+        android:textSize="14sp" />
+    
     <ToggleButton
         android:id="@+id/toggleButton"
         android:layout_width="match_parent"
@@ -51,7 +50,6 @@
         android:background="@android:color/darker_gray"
         android:textOff="Start Recording"
         android:textOn="Stop Recording" />
-
 
     <Button
         android:id="@+id/button2"
