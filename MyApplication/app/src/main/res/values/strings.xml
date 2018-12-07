@@ -7,6 +7,8 @@
     <string name="start_writing">Start Writing</string>
     <string name="send_text">Send Text</string>
     <string name="font_prompt">--Select a Font--</string>
+    <string name="display_message">Your Recorded Message Is Displayed Here</string>
+    <string name="instruction_message">Edit text and Select a Font</string>
 
     <string-array name="fonts_array">
         <item>courier</item>
