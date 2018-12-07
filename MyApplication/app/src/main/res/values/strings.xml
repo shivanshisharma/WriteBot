@@ -9,7 +9,6 @@
     <string name="font_prompt">--Select a Font--</string>
 
     <string-array name="fonts_array">
-
         <item>courier</item>
         <item>cursive</item>
         <item>cyrillic_ii</item>
