@@ -18,7 +18,7 @@
         android:focusable="false"
         android:foregroundGravity="center_horizontal"
         android:inputType="textPersonName"
-        android:text="Edit text and Select a Font" />
+        android:text="@string/display_message" />
 
     <EditText
         android:id="@+id/editText"
@@ -28,7 +28,7 @@
         android:layout_marginTop="25dp"
         android:background="@android:color/background_light"
         android:gravity="left|center"
-        android:hint="Your Recorded Message Is Displayed Here"
+        android:hint="@string/display_message"
         android:scrollbars="vertical"
         android:textCursorDrawable="@drawable/color_cursor" />
     <Spinner
@@ -37,19 +37,20 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
+
         android:prompt="@string/font_prompt"
         android:background="@android:drawable/btn_dropdown"
         android:textAlignment="center"
-        android:textSize="14sp" />
-    
+        android:textSize="14sp"/>
+
     <ToggleButton
         android:id="@+id/toggleButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:background="@android:color/darker_gray"
-        android:textOff="Start Recording"
-        android:textOn="Stop Recording" />
+        android:textOff="@string/start_recording"
+        android:textOn="@string/stop_recording" />
 
     <Button
         android:id="@+id/button2"
