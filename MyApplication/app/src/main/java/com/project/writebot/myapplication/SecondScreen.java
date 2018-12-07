@@ -37,9 +37,10 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
             }
         });
         listenThread.start();
+
         actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FF000000")));
-
+        //spinner class for the scroll button
         spinner = (Spinner) findViewById(R.id.fonts_spinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(SecondScreen.this,
                 android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.fonts_array));
@@ -49,12 +50,12 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
 
         Button button = findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 storeText();
             }
         });
+        //recording button
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
         TextView tt = (TextView) findViewById(R.id.toggleButton);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -67,6 +68,7 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
                 }
             }
         });
+        //writing button
         ToggleButton togglepart2 = (ToggleButton) findViewById(R.id.toggleButton2);
         TextView ttpart2 = (TextView) findViewById(R.id.toggleButton2);
         togglepart2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -80,19 +82,7 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
             }
         });
     }
-
-    public void onItemSelected(AdapterView<?> parent, View view,
-                                int pos, long id) {
-
-        String item = parent.getItemAtPosition(pos).toString();
-        System.out.println("You have selected the font: " + item );
-        storeFont(item);
-    }
-
-    public void onNothingSelected(AdapterView<?> parent) {
-        // Another interface callback
-    }
-
+    //setting up port and IP Address
     private void configureSocket() {
         try {
             this.socket = new DatagramSocket(1068);
@@ -101,7 +91,20 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
             System.out.println(e);
         }
     }
+    //function when user picks a text
+    public void onItemSelected(AdapterView<?> parent, View view,
+                                int pos, long id) {
 
+        String item = parent.getItemAtPosition(pos).toString();
+        System.out.println("You have selected the font: " + item );
+        storeFont(item);
+    }
+    //If the user does not pick a font
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
+    }
+    
+    //listen to receive packets from the server
     private void listen() {
         while (true) {
             try {
@@ -117,7 +120,7 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
             }
         }
     }
-
+    //processing packets are being received from the server
     private void processPacket(DatagramPacket packet) {
         try {
             String receivedString = new String(packet.getData(), "UTF-8").substring(0, packet.getLength());
@@ -130,20 +133,19 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    private void processCommand(String opcode, String message) {
-        switch (opcode) {
-            case "06":
-                System.out.println("Showing text");
-                EditText textView = findViewById(R.id.editText);
-                textView.setText(message);
-            case "09":
-                System.out.println("Received ACK for command with opcode " + opcode);
-                break;
-            default:
-                System.out.println("Not supported");
+    //sending an ack back
+    private void sendMessage(String message) {
+        byte[] data = message.getBytes();
+        DatagramPacket sendPacket = new DatagramPacket(data, data.length, this.serverAddress, this.serverPort);
+        try {
+            System.out.println("Sending to " + this.serverAddress + " Port: " + this.serverPort);
+            this.socket.send(sendPacket);
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 
+    //methods for commands using opcodes that are recognized by the server
     private void startRecording() {
         String opCode = "01";
         sendMessageOnNewThread(opCode);
@@ -171,11 +173,26 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
         sendMessageOnNewThread(opCode);
     }
 
+    private void processCommand(String opcode, String message) {
+        switch (opcode) {
+            case "06":
+                System.out.println("Showing text");
+                EditText textView = findViewById(R.id.editText);
+                textView.setText(message);
+            case "09":
+                System.out.println("Received ACK for command with opcode " + opcode);
+                break;
+            default:
+                System.out.println("Not supported");
+        }
+    }
+
     private void storeFont(String item) {
         String opCode = "07";
         sendMessageOnNewThread(opCode + item);
         System.out.println(opCode + " " +  item);
     }
+    //Sending message on a new thread
     private void sendMessageOnNewThread(final String message) {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -185,18 +202,4 @@ public class SecondScreen extends AppCompatActivity implements AdapterView.OnIte
         });
         thread.start();
     }
-
-    private void sendMessage(String message) {
-        byte[] data = message.getBytes();
-        DatagramPacket sendPacket = new DatagramPacket(data, data.length, this.serverAddress, this.serverPort);
-        try {
-            System.out.println("Sending to " + this.serverAddress + " Port: " + this.serverPort);
-            this.socket.send(sendPacket);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-
 }
-
-
