@@ -38,7 +38,7 @@ class Database:
         self.database.commit()
         return
 
-    def storeFontName(self, str):
+    def storeFont(self, str):
         sql = "INSERT INTO fonts(fontName) VALUES (%s)"
         self.database.cursor().execute(sql, (str,))
         self.database.commit()
@@ -49,10 +49,16 @@ class Database:
         self.database.cursor().execute(sql, (id,))
         self.database.commit()
         return
+    
+    def deleteAllWords(self):
+        sql = "truncate table words"
+        self.database.cursor().execute(sql)
+        self.database.commit()
+        return
 
-    def deleteFontName(self, str):
-        sql = "DELETE FROM fonts WHERE fontName = %s"
-        self.database.cursor().execute(sql, (str,))
+    def deleteAllFonts(self):
+        sql = "truncate table fonts"
+        self.database.cursor().execute(sql)
         self.database.commit()
         return
 
@@ -66,15 +72,23 @@ class Database:
             return wordTuple[1]
         else:
             return None
-
-##start()
-##database = Database()
-##database.storeWord("Capricious")
-##database.storeWord("Capricious1")
-##database.storeWord("Capricious2")
-##storeFontName("Helvatica")
-##storeFontName("Times New Romans")
-##deleteWordByID("4")
-##deleteFontName("Helvatica")
-##print(dequeueNextWord())
-##print(dequeueNextWord())
+    
+    def getSelectedFont(self):
+        sql = "SELECT * FROM fonts"
+        cursor = self.database.cursor(buffered=True)
+        cursor.execute(sql)
+        wordTuple = cursor.fetchone()
+        if wordTuple is not None:
+            return wordTuple[1]
+        else:
+            return None
+        
+    def getAllWords(self):
+        words = []
+        sql = "SELECT * FROM words"
+        cursor = self.database.cursor(buffered=True)
+        cursor.execute(sql)
+        for wordTuple in cursor.fetchall():
+            words.append(wordTuple[1])
+            
+        return words
