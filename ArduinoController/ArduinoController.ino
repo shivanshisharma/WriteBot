@@ -24,7 +24,7 @@ Stepper penMotor(150, 8, 9, 10, 11);
 //#define VERBOSE              (1)       // add to get a lot more serial output.
 
 #define VERSION              (2)                      // firmware version
-#define BAUD                 (14400)                 // How fast is the Arduino talking?(BAUD Rate of Arduino)
+#define BAUD                 (9600)                 // How fast is the Arduino talking?(BAUD Rate of Arduino)
 #define MAX_BUF              (64)                     // What is the longest message Arduino can store?
 #define STEPS_PER_TURN       (200)                    // depends on your stepper motor.  most are 200.
 #define STEPS_PER_MM         (STEPS_PER_TURN*16/0.8)  // (400*16)/0.8 with a M5 spindle
@@ -49,8 +49,6 @@ typedef struct {
 typedef struct {
   int step_pin;
   int dir_pin;
-  //int enable_pin;
-  //int limit_switch_pin;
 } Motor;
 
 
@@ -163,7 +161,7 @@ void line(float newx,float newy) {
         a[j].over -= maxsteps;
         
         digitalWrite(motors[j].step_pin,HIGH);
-        delayMicroseconds(800);
+        delayMicroseconds(1000);
         digitalWrite(motors[j].step_pin,LOW);
       }
     }
@@ -181,23 +179,23 @@ void line(float newx,float newy) {
 
 }
 
-void penUp(void){
+void penDown(void){
     if (!penState) {
       penMotor.step(150);
       penState = 1;
       delay(1000);
     } else {
-      Serial.println("Pen is already up");
+      Serial.println("Pen is already down");
     }
 }
 
-void penDown(void){
+void penUp(void){
     if (penState) {
       penMotor.step(-150);
       penState = 0;
       delay(1000);
     } else {
-      Serial.println("Pen is already down");
+      Serial.println("Pen is already up");
     }
 }
 /**
@@ -236,24 +234,6 @@ void processCommand() {
   } else {
     Serial.println("Invalid command G" + cmd);
   }
-//  switch(cmd) {
-//    
-//  case  0:
-//    Serial.println("Zero");
-//    penUp();
-//    Serial.println("Pen up done");
-//    line( parseNumber('X',(mode_abs?px:0)) + (mode_abs?0:px),
-//          parseNumber('Y',(mode_abs?py:0)) + (mode_abs?0:py));
-//  case  1: // line
-//    Serial.println("One");
-//    penDown();
-//    Serial.println("Pen down done");
-//    line( parseNumber('X',(mode_abs?px:0)) + (mode_abs?0:px),
-//          parseNumber('Y',(mode_abs?py:0)) + (mode_abs?0:py));
-//    break;
-//  default:
-//        break;
-//  }
 }
 
 
@@ -272,23 +252,9 @@ void ready() {
 void motor_setup() {
   motors[0].step_pin=3;     //x-axis motor
   motors[0].dir_pin=2;
-  //motors[0].enable_pin=8;
-  //motors[0].limit_switch_pin=9;
 
   motors[1].step_pin=5;     //y-axis motor
   motors[1].dir_pin=4;
-  //motors[1].enable_pin=8;
-  //motors[1].limit_switch_pin=10;
-
-  //motors[2].step_pin=4;
-  //motors[2].dir_pin=7;
-//  motors[2].enable_pin=8;
-//  motors[2].limit_switch_pin=11;
-//
-//  motors[3].step_pin=12;
-//  motors[3].dir_pin=13;
-//  motors[3].enable_pin=8;
-//  motors[3].limit_switch_pin=11;
    
   pinMode(MS1,OUTPUT);
   pinMode(MS2,OUTPUT);
@@ -299,25 +265,8 @@ void motor_setup() {
     // set the motor pin & scale
     pinMode(motors[i].step_pin,OUTPUT);
     pinMode(motors[i].dir_pin,OUTPUT);
-    //pinMode(motors[i].enable_pin,OUTPUT);
   }
 }
-
-//
-//void motor_enable() {
-//  int i;
-//  for(i=0;i<NUM_AXIES;++i) {  
-//    digitalWrite(motors[i].enable_pin,LOW);
-//  }
-//}
-//
-//
-//void motor_disable() {
-//  int i;
-//  for(i=0;i<NUM_AXIES;++i) {  
-//    digitalWrite(motors[i].enable_pin,HIGH);
-//  }
-//}
 
 
 /**
@@ -327,7 +276,6 @@ void setup() {
   Serial.begin(BAUD);  // open coms
 
   motor_setup();
-  //motor_enable();
 
 
   digitalWrite(MS1, LOW);           // configure to full step
@@ -358,18 +306,12 @@ void loop() {
       Serial.flush();
       buffer[sofar]=0;  // end the buffer so string functions work right
       processCommand();  // do something with the command
-      Serial.println("09");
+      Serial.println("09"); // Send Acknowledgement
       Serial.flush();
       ready();
     }
   }
 }
-
-//String myString = Serial.readString();
-//  Serial.println(myString);
-//  //delay(1000);
-//  char * buf = (char*) malloc(sizeof(char) *myString.length()+1);
-//  Serial.println(myString);
 
 
 /**
