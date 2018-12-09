@@ -239,14 +239,3 @@ class GCodeGenerator:
             return "G00 X%.4f Y%.4f~" %((rotatedX + xStart), (rotatedY + yStart))
         else:
             return "G01 X%.4f Y%.4f~" %((rotatedX + xStart), (rotatedY + yStart))
-    
-    def sanitize(self, string):
-        retval = ''
-        good=' ~!@#$%^&*_+=-{}[]|\:;"<>,./?'
-        for char in string:
-            if char.isalnum() or good.find(char) != -1:
-                retval += char
-            else: retval += ( ' 0x%02X ' %ord(char))
-        return retval
-##g = GCodeGenerator("Hello")
-##print("\".join(g.generateGCode()))
