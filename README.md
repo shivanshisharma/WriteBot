@@ -1,3 +1,8 @@
+My 3rd Year Engineering Design Project in which the robot used various speech-to-text converting APIs to receive input from a Mic (client based on a Raspberry Pi 2), stored information on a server (Raspberry Pi 3), and then wrote the text on paper after converting to text. My part of the project was to design an Android Application in Android Studio, which displayed the recorded text on the application, and allowed the user to start/stop recording, edit the text, and send the text to the 'WriteBot' in their choice of font.
+
+
+
+
 # WriteBot
 
 ## Instructions on how to start the system 
